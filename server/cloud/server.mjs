@@ -32,12 +32,23 @@ export function createCloudServer({
     busy = false,
     closing = false,
     lastSweep = 0;
-  const initialized = (async () => {
-    if (migrate) await db.migrate();
-    await store.init();
-  })();
-  // Attach a rejection handler immediately; requests receive a bounded 503 below.
-  initialized.catch(() => {});
+  let initialization;
+  const ensureReady = () => {
+    if (!initialization)
+      initialization = (async () => {
+        if (migrate) await db.migrate();
+        await store.init();
+      })().catch((error) => {
+        initialization = null;
+        console.error(
+          "Shared storage initialization failed:",
+          error.code || error.name,
+        );
+        throw error;
+      });
+    return initialization;
+  };
+  ensureReady().catch(() => {});
   app.disable("x-powered-by");
   app.use((_req, res, next) => {
     res.set({
@@ -54,10 +65,13 @@ export function createCloudServer({
   app.use("/api", async (req, res, next) => {
     res.set("Cache-Control", "no-store");
     try {
-      await initialized;
-    } catch {
+      await ensureReady();
+    } catch (error) {
       return res.status(503).json({
         error: "Shared storage is unavailable. Please try again shortly.",
+        ...(req.path === "/health"
+          ? { storageCode: error.code || "UNAVAILABLE" }
+          : {}),
       });
     }
     if (!["GET", "HEAD"].includes(req.method) && !validOrigin(req))
@@ -236,7 +250,7 @@ export function createCloudServer({
     if (busy || closing) return;
     busy = true;
     try {
-      await initialized;
+      await ensureReady();
       const sockets = [...wss.clients].filter((ws) => ws.user);
       if (!sockets.length) return;
       const ids = sockets.map((ws) => ws.user.id),
@@ -335,7 +349,7 @@ export function createCloudServer({
       }
       queue = queue
         .then(async () => {
-          await initialized;
+          await ensureReady();
           const data = JSON.parse(raw.toString());
           if (!data || typeof data !== "object" || Array.isArray(data))
             throw new Error("Invalid message.");
@@ -421,7 +435,7 @@ export function createCloudServer({
         socket.destroy();
         return;
       }
-      await initialized;
+      await ensureReady();
       wss.handleUpgrade(req, socket, head, (ws) =>
         wss.emit("connection", ws, req),
       );
@@ -430,7 +444,7 @@ export function createCloudServer({
     }
   });
   const ready = (async () => {
-    await initialized;
+    await ensureReady();
     if (!listen) return null;
     return new Promise((resolve, reject) => {
       http.once("error", reject);
