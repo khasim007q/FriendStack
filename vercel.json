@@ -1,0 +1,17 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "framework": "vite",
+  "buildCommand": "npm run db:migrate && npm run build",
+  "outputDirectory": "dist",
+  "functions": {
+    "api/server.mjs": {
+      "maxDuration": 300,
+      "includeFiles": "server/cloud/schema.sql"
+    }
+  },
+  "rewrites": [
+    { "source": "/api/:path*", "destination": "/api/server" },
+    { "source": "/ws/cards", "destination": "/api/server" },
+    { "source": "/((?!api/|assets/|ws/).*)", "destination": "/index.html" }
+  ]
+}

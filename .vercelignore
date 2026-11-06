@@ -1,0 +1,10 @@
+node_modules
+data
+test-results
+artifacts
+.env
+.env.*
+tests
+docs
+.git
+QA.md
