@@ -69,11 +69,11 @@ export async function api(server, path, body, token, headers = {}) {
   });
   return { status: r.status, body: await r.json() };
 }
-export async function account(server, name) {
+export async function account(server, name, password = "Cloud-playtest-123") {
   const r = await api(server, "/auth/register", {
     name,
     username: name,
-    password: "Cloud-playtest-123",
+    password,
   });
   assert.equal(r.status, 200, JSON.stringify(r.body));
   const boot = await api(server, "/me", undefined, r.body.token);

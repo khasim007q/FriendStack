@@ -61,6 +61,10 @@ Both runs saved one result per human participant, asserted no private-card/descr
 
 These numbers describe this computer and test workload. They do not establish Vercel or Neon Free-plan capacity, geographic latency, physical-device behavior or a long soak. The schema-qualified pooler-compatible adapter passed its regression suite and a subsequent smaller load run. Vercel deployment and remote smoke checks are recorded separately once complete.
 
+The shared suite now contains 10 checks (39 total with the local suite), including recovery of the same instance after an unavailable schema is repaired. All passed locally, and GitHub Actions completed the tests, build, audit and load smoke run on Ubuntu.
+
+The Vercel deployment at `https://friendstack.vercel.app` returned a healthy shared-storage API. An explicit online smoke run created two fictional identities, designed/claimed/approved a private trait, started a duel, reconnected with the same hidden hand, processed duplicate delivery, played 67 legal moves to natural health defeat, verified both saved results and rematch readiness, left the rooms and signed out. It recorded no private-data leaks or unexpected protocol errors. Confirmed-move latency from this computer was 259 ms median / 289 ms p95. The first deployment exposed a transient initialization failure; initialization now retries on later requests instead of permanently poisoning a warm instance, with safe health codes and a dedicated recovery test.
+
 ## Remaining release checks
 
 This is the local milestone, not a hosted beta. Network tests run on one machine. Phone layouts are tested using a desktop browser viewport rather than physical phones. Arbitrary user code and AI-invented executable abilities are intentionally unsupported: the builder uses bounded rules. The current bot is a heuristic practice opponent. Balance values need human playtesting.

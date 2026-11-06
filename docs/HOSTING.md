@@ -41,6 +41,8 @@ npm run test:load -- --rooms=500
 npm run build
 ```
 
+For an explicitly requested, small live smoke test, run `node scripts/smoke-online.mjs --base=https://YOUR-DEPLOYMENT`. It creates two clearly fictional trial identities with random passwords, plays a duel, checks privacy/reconnect/results, leaves the rooms and revokes its sessions. It is never run automatically against a deployment by CI. Current live trial: https://friendstack.vercel.app .
+
 Cloud/load checks start a real, temporary Postgres database bound to loopback. They never use `DATABASE_URL`, cloud accounts, production rooms or a mocked database. Load traffic passes through a test-only round-robin ingress into three independent runtime instances. JSON reports are written to ignored `artifacts/`. GitHub Actions runs rules/network tests, shared-storage tests, a build, dependency audit and a 50-player load smoke test on pushes and PRs; extended load runs are manual.
 
 Measured loopback results are not a production capacity commitment. Record Vercel-region latency, real device reconnects, database utilization, provider quotas and extended soak results after deployment. Raise `MAX_CARD_ROOMS` only after measuring the actual environment.

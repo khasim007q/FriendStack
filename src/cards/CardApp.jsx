@@ -1715,7 +1715,12 @@ export default function CardApp() {
           friendstack<b>.</b>
         </a>
         <span className="fs-alpha">
-          THE CARD GAME <small>LOCAL ALPHA</small>
+          THE CARD GAME{" "}
+          <small>
+            {import.meta.env.VITE_SHARED_HOSTING
+              ? "ONLINE ALPHA"
+              : "LOCAL ALPHA"}
+          </small>
         </span>
         <nav aria-label="Main navigation">
           {!import.meta.env.VITE_SHARED_HOSTING && (
@@ -1796,7 +1801,9 @@ export default function CardApp() {
           <div className="sidebar-bottom">
             <span className="fs-local">
               <span />
-              LOCAL PLAYGROUND
+              {import.meta.env.VITE_SHARED_HOSTING
+                ? "ONLINE PLAYGROUND"
+                : "LOCAL PLAYGROUND"}
             </span>
             <p>
               Built around your people.
@@ -2306,9 +2313,11 @@ export default function CardApp() {
               <span className="footer-status" />{" "}
               {data
                 ? client.status === "connected"
-                  ? `LOCAL SERVER · ${client.rtt ?? "…"} ms`
+                  ? `${import.meta.env.VITE_SHARED_HOSTING ? "ONLINE SERVER" : "LOCAL SERVER"} · ${client.rtt ?? "…"} ms`
                   : "CONNECTING TO YOUR TABLE"
-                : "LOCAL PLAYGROUND"}
+                : import.meta.env.VITE_SHARED_HOSTING
+                  ? "ONLINE PLAYGROUND"
+                  : "LOCAL PLAYGROUND"}
               <span className="footer-divider">/</span> BUILT FOR YOUR KIND OF
               PEOPLE.
             </span>
