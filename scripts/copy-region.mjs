@@ -59,6 +59,12 @@ try {
 } catch (error) {
   // Connection failures can include credentials or row contents in their message.
   console.error("Region copy stopped:", error.code || error.name);
+  if (
+    /^(Source and destination|Direct Postgres clients|A private backup|Destination is not empty|Unexpected source tables|Players are connected|A duel is still|Trial migration exceeds|Verification failed)/.test(
+      error.message,
+    )
+  )
+    console.error(error.message);
   console.error(
     "Inspect both databases before retrying or thawing the source.",
   );

@@ -150,6 +150,7 @@ test("region copy refuses an occupied destination and the same source database",
 test("an uncertain destination commit keeps the source frozen until an operator verifies it", async (t) => {
   const f = await fixture(t);
   const target = {
+    connectionParameters: f.target.connectionParameters,
     query: async (...args) => {
       const result = await f.target.query(...args);
       if (args[0] === "COMMIT") throw Error("Connection lost after commit");

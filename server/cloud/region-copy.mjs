@@ -67,20 +67,17 @@ export async function copyRegion({
 }) {
   const src = namespace(sourceSchema),
     dst = namespace(targetSchema);
-  const sourceIdentity = (
-    await source.query(
-      "SELECT current_database() AS db, inet_server_addr()::text AS host",
-    )
-  ).rows[0];
-  const targetIdentity = (
-    await target.query(
-      "SELECT current_database() AS db, inet_server_addr()::text AS host",
-    )
-  ).rows[0];
+  // Neon exposes the same internal server address in different projects. Use
+  // the direct endpoint hostname rather than inet_server_addr() for identity.
+  const sourceIdentity = source.connectionParameters;
+  const targetIdentity = target.connectionParameters;
+  if (!sourceIdentity || !targetIdentity)
+    throw Error("Direct Postgres clients are required.");
   if (
     sourceSchema === targetSchema &&
-    sourceIdentity.db === targetIdentity.db &&
-    sourceIdentity.host === targetIdentity.host
+    sourceIdentity.database === targetIdentity.database &&
+    sourceIdentity.host === targetIdentity.host &&
+    sourceIdentity.port === targetIdentity.port
   )
     throw Error("Source and destination must be different databases.");
   if (typeof backup !== "function")
