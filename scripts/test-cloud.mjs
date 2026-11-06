@@ -43,7 +43,12 @@ try {
         "scripts/cloud-load.mjs",
         ...process.argv.slice(2).filter((x) => x !== "--load"),
       ]
-    : ["--test", "--test-concurrency=1", "tests/cloud/shared.test.mjs"];
+    : [
+        "--test",
+        "--test-concurrency=1",
+        ...process.argv.slice(2),
+        "tests/cloud/shared.test.mjs",
+      ];
   const child = spawn(process.execPath, args, {
     cwd: workspace,
     stdio: "inherit",

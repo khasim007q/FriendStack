@@ -1,6 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { randomUUID } from "node:crypto";
+import { createCloudServer } from "../../server/cloud/server.mjs";
 import { CATALOG, defaultAbility } from "../../shared/cards.mjs";
 import { fixture, api, account, duel, until, wait } from "./helpers.mjs";
 
@@ -407,3 +408,23 @@ test(
     );
   },
 );
+
+test("an unavailable schema reports a safe health code and the same instance recovers after repair", async (t) => {
+  const runtime = createCloudServer({
+    url: process.env.FRIENDSTACK_TEST_DATABASE_URL,
+    schema: `repair_${randomUUID().replaceAll("-", "")}`,
+    listen: false,
+    migrate: false,
+  });
+  t.after(() => runtime.close());
+  await runtime.ready.catch(() => {});
+  await new Promise((r) => runtime.http.listen(0, "127.0.0.1", r));
+  const url = `http://127.0.0.1:${runtime.http.address().port}/api/health`;
+  let response = await fetch(url);
+  assert.equal(response.status, 503);
+  assert.equal((await response.json()).storageCode, "42P01");
+  await runtime.db.migrate();
+  response = await fetch(url);
+  assert.equal(response.status, 200);
+  assert.equal((await response.json()).mode, "shared");
+});
