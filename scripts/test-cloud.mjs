@@ -48,6 +48,7 @@ try {
         "--test-concurrency=1",
         ...process.argv.slice(2),
         "tests/cloud/shared.test.mjs",
+        "tests/cloud/migration.test.mjs",
       ];
   const child = spawn(process.execPath, args, {
     cwd: workspace,
@@ -68,4 +69,6 @@ try {
   if (directory.startsWith(root + sep) && resolve(directory) === directory)
     await rm(directory, { recursive: true, force: true });
 }
-process.exitCode = exit;
+// embedded-postgres installs a beforeExit hook that exits with 0, overriding
+// process.exitCode. Cleanup is complete above; explicitly preserve suite failure.
+process.exit(exit);

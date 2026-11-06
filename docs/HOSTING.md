@@ -23,6 +23,22 @@ The visual interface is provisional. This stage changes hosting and session corr
 
 Local data is deliberately **not uploaded**. Online identities start in the new Postgres database. The local SQLite game and football test lab remain available with `npm start`; the football simulation is not distributed by the cloud card backend.
 
+## Singapore region migration
+
+`vercel.json` selects `sin1`. Both the build migration and runtime prefer `STORAGE_SINGAPORE_DATABASE_URL`, supplied by the new Singapore Neon store, over the original `DATABASE_URL`. The original integration remains connected for recovery; do not assume changing its unprefixed variable changes the active database. Keep the Function and database in the same region.
+
+Neon projects cannot change region in place. For this small trial schema, `scripts/copy-region.mjs` copies all 15 FriendStack tables into an empty destination. Supply direct, unpooled `SOURCE_DATABASE_URL` and `TARGET_DATABASE_URL` through an ignored local env file, then run:
+
+```sh
+node --env-file=data/region-migration/.env.copy scripts/copy-region.mjs --copy-and-freeze-source
+```
+
+The tool refuses an occupied destination, unexpected source tables, active player connections, or unfinished duels. It locks the source tables while installing write guards, then copies exact Postgres JSON row representations, including password hashes, sessions, private descriptions, decks, results and frozen cards. It writes a private backup under ignored `data/region-migration/` and verifies each table by row count and SHA-256 before committing the destination. No provider authentication, unrelated schemas, or roles are copied. This is limited to a 64 MiB trial snapshot; larger databases need streaming dump/restore or replication.
+
+Deploy the Singapore configuration only after the verified copy. The old source stays frozen, including writes from older deployments, so it cannot silently diverge after cutover. A failure before the destination commit rolls back the copy and removes the source guards. A lost connection during commit leaves the source frozen because the outcome is uncertain; inspect both sides before doing anything else. The isolated migration tests cover these cases and restored login sessions.
+
+Retain the original database and private backup until the new deployment is validated. Before the destination accepts new writes, a rollback can restore the previous deployment and remove only the migration triggers using exported `thawSource` from `server/cloud/region-copy.mjs`. Once the destination has accepted writes, reverting to the old snapshot would lose those changes: drain traffic and reconcile/copy the destination data first. Never delete a database as part of this procedure. A brief maintenance interval is expected while the source is frozen and the replacement deployment builds.
+
 ## Deadlines and outages
 
 Turn and match deadlines are persisted absolute times. Actions reconcile the clock before making a move, so a delayed packet cannot extend a turn. Active sockets drive bounded, transaction-safe sweeps. A resumed request also reconciles overdue rooms. If no Function is active, elapsed deadlines still apply; results are materialized on the next sweep or request.

@@ -9,7 +9,7 @@ import { SharedDuels } from "./duels.mjs";
 import { validOrigin } from "../cards/service.mjs";
 
 export function createCloudServer({
-  url = process.env.DATABASE_URL,
+  url = process.env.STORAGE_SINGAPORE_DATABASE_URL || process.env.DATABASE_URL,
   schema = "friendstack",
   port = 0,
   host = "127.0.0.1",
