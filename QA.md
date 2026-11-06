@@ -65,8 +65,20 @@ The shared suite now contains 10 checks (39 total with the local suite), includi
 
 The Vercel deployment at `https://friendstack.vercel.app` returned a healthy shared-storage API. An explicit online smoke run created two fictional identities, designed/claimed/approved a private trait, started a duel, reconnected with the same hidden hand, processed duplicate delivery, played 67 legal moves to natural health defeat, verified both saved results and rematch readiness, left the rooms and signed out. It recorded no private-data leaks or unexpected protocol errors. Confirmed-move latency from this computer was 259 ms median / 289 ms p95. The first deployment exposed a transient initialization failure; initialization now retries on later requests instead of permanently poisoning a warm instance, with safe health codes and a dedicated recovery test.
 
+## Live two-player endurance check — 6 November 2026
+
+One ordinary eight-minute match was played against `https://friendstack.vercel.app` with two fictional identities. Each player summoned a friend and then normal 30-second turn timeouts advanced the duel. The match reached its real deadline, finished as a draw, saved both participants' results, opened a rematch lobby, and cleaned up the seats and authentication sessions. Total setup/play/cleanup time was 492 seconds.
+
+One deliberate disconnect recovered in 1,458 ms. Two unplanned WebSocket closes (code 1006) recovered automatically in 1,711 ms and 1,458 ms. Every reconnect preserved the hand, board, mana and original match deadline. The client observations alone cannot attribute the unplanned closes specifically to hosting or the network.
+
+All ten API health checks succeeded. Ping RTT was 204 ms median, 219 ms p95, and 263 ms p99 from the test computer. The clients received 57 state snapshots and reported no privacy violations or protocol errors. These are normal two-player reliability measurements, not concurrent-player capacity measurements.
+
+The reproducer is `scripts/soak-online.mjs`; the detailed report is retained locally in ignored `artifacts/online-endurance-1793963053375.json`. A reporting counter originally included lobby transitions; it is explicitly labelled as a legacy transition counter in that report, and the reproducer now counts timeouts from the final playing turn before rematch.
+
+No hosted concurrency ramp was attempted: [Vercel's published load-testing policy](https://vercel.com/kb/guide/what-s-vercel-s-policy-regarding-load-testing-deployments) requires Enterprise or prior provider agreement. The Hobby deployment's maximum capacity remains unmeasured.
+
 ## Remaining release checks
 
-This is the local milestone, not a hosted beta. Network tests run on one machine. Phone layouts are tested using a desktop browser viewport rather than physical phones. Arbitrary user code and AI-invented executable abilities are intentionally unsupported: the builder uses bounded rules. The current bot is a heuristic practice opponent. Balance values need human playtesting.
+The local milestone and a hosted functional trial are implemented. Local capacity tests run on one machine; the separate two-player online checks exercise the real Vercel deployment. Phone layouts are tested using a desktop browser viewport rather than physical phones. Arbitrary user code and AI-invented executable abilities are intentionally unsupported: the builder uses bounded rules. The current bot is a heuristic practice opponent. Balance values need human playtesting.
 
-Live rooms are ephemeral; persistent social and match data survive server restarts. Internet deployment, recovery email, automated backups, physical-device checks, longer soak testing, and geographic-latency testing remain the subsequent private-beta milestone.
+Local SQLite rooms are ephemeral. Shared online rooms, social data and match results are persisted in Postgres. Account recovery, verified backup/restore, physical-device checks and geographic-latency testing remain before a broader beta. Hosted maximum capacity is unmeasured. Vercel's published load-testing policy requires Enterprise or prior provider agreement, so no synthetic concurrency ramp is run against the Hobby deployment.

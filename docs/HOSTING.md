@@ -43,6 +43,10 @@ npm run build
 
 For an explicitly requested, small live smoke test, run `node scripts/smoke-online.mjs --base=https://YOUR-DEPLOYMENT`. It creates two clearly fictional trial identities with random passwords, plays a duel, checks privacy/reconnect/results, leaves the rooms and revokes its sessions. It is never run automatically against a deployment by CI. Current live trial: https://friendstack.vercel.app .
 
+For a normal two-player endurance check, use `node scripts/soak-online.mjs --base=https://YOUR-DEPLOYMENT`. This runs one eight-minute match, holds two real player connections, checks normal turn expiry and reconnect recovery, verifies both saved results and cleans up its own sessions. It does not create a concurrency ramp or measure capacity.
+
+**Hosted load-test restriction:** [Vercel's published load-testing policy](https://vercel.com/kb/guide/what-s-vercel-s-policy-regarding-load-testing-deployments) restricts capacity load tests to Enterprise or prior agreement with Vercel. Do not ramp synthetic traffic against the Hobby deployment. Use an explicitly approved staging target and coordinate the database provider before a hosted capacity test. Neither a two-player smoke test nor an endurance check establishes maximum concurrent-player capacity.
+
 Cloud/load checks start a real, temporary Postgres database bound to loopback. They never use `DATABASE_URL`, cloud accounts, production rooms or a mocked database. Load traffic passes through a test-only round-robin ingress into three independent runtime instances. JSON reports are written to ignored `artifacts/`. GitHub Actions runs rules/network tests, shared-storage tests, a build, dependency audit and a 50-player load smoke test on pushes and PRs; extended load runs are manual.
 
 Measured loopback results are not a production capacity commitment. Record Vercel-region latency, real device reconnects, database utilization, provider quotas and extended soak results after deployment. Raise `MAX_CARD_ROOMS` only after measuring the actual environment.
